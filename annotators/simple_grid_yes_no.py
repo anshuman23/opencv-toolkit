@@ -3,7 +3,8 @@ import os
 import numpy as np
 
 print "[INFO] Change the size of the grid square according to your requirements [LINE 6]"
-grid_size = 208 
+print "[INFO] Input image is always made into a square image using custom resizing from the center of the image. You will 100% be required to change the code doing this according to your requirements [LINE 19, LINE 20, LINE 26 and LINE 27]"
+grid_size = 208                                         
 
 k = -100
 
