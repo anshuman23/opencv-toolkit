@@ -1,0 +1,117 @@
+import cv2
+import numpy as np
+import os
+from sklearn.cluster import KMeans
+'''
+image = cv2.imread('image_150310_008.JPG')
+image_copy = np.copy(image)
+image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+image = cv2.bilateralFilter(image, 5, 175, 175)
+
+canny = cv2.Canny(image,12,15)
+
+h,w = image.shape
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (max(10, int(0.01*h +1)), max(10, int(0.01*h +1))))
+canny = cv2.morphologyEx(canny, cv2.MORPH_DILATE, kernel)
+im2,contours, heirarchy = cv2.findContours(canny, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+im2 
+
+image_copy = cv2.drawContours(image_copy, contours, -1, (255,255,255),3)
+#cv2.namedWindow('first', cv2.WINDOW_NORMAL)
+#cv2.imshow('first', image_copy)
+#cv2.waitKey(0)
+'''
+image = cv2.imread('image_150310_008.JPG')
+image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+image = image.reshape((image.shape[0] * image.shape[1], 3))
+
+clt = KMeans(n_clusters = 2)
+clt.fit(image)
+
+centroids = clt.cluster_centers_
+
+centroids = centroids.astype('uint8').tolist()
+    
+image = cv2.imread('image_150310_008.JPG')
+color = centroids[0] 
+lower = np.array([color[2]-10, color[1]-10, color[0]-10])
+upper = np.array([color[2]+10, color[1]+10, color[0]+10])
+mask = cv2.inRange(image, lower, upper)
+
+image = cv2.bitwise_and(image, image, mask = mask)
+cv2.namedWindow('mask', cv2.WINDOW_NORMAL)
+cv2.imshow('mask', image)
+cv2.waitKey(0)
+'''
+img = cv2.imread('image_150310_008.JPG')
+#img = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+gray = cv2.imread('image_150310_008.JPG', cv2.IMREAD_GRAYSCALE)
+kernel = np.ones((3,3), np.uint8)
+
+_, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+
+opening = cv2.morphologyEx(thresh,cv2.MORPH_OPEN,kernel, iterations = 2)
+# sure background area
+sure_bg = cv2.dilate(opening,kernel,iterations=3)
+# Finding sure foreground area
+dist_transform = cv2.distanceTransform(opening,cv2.DIST_L2,3)
+ret, sure_fg = cv2.threshold(dist_transform,0.0001*dist_transform.max(),255,0)
+# Finding unknown region
+sure_fg = np.uint8(sure_fg)
+cv2.namedWindow('watershed', cv2.WINDOW_NORMAL)
+cv2.imshow('watershed', sure_fg)
+cv2.waitKey(0)
+
+unknown = cv2.subtract(sure_bg,sure_fg)
+
+ret, markers = cv2.connectedComponents(sure_fg)
+markers = markers + 1
+
+markers[unknown  == 255] = 0
+markers = cv2.watershed(img,markers)
+img[markers == -1] = [255,255,255]
+
+cv2.namedWindow('watershed', cv2.WINDOW_NORMAL)
+cv2.imshow('watershed', img)
+cv2.waitKey(0)
+
+#for f in os.listdir('/home/anshuman/coding_practice/Blood-Images-Dataset/'):
+#    if f.split('.')[-1] == 'JPG':
+for i in range(1):
+    f = 'image_150310_008.JPG'
+    for j in range(1):
+        #img_color = cv2.imread('/home/anshuman/coding_practice/Blood-Images-Dataset/'+f)
+        #img = cv2.imread('/home/anshuman/coding_practice/Blood-Images-Dataset/'+f, cv2.IMREAD_GRAYSCALE)
+
+        img_color = image
+        img = cv2.cvtColor(img_color, cv2.COLOR_BGR2GRAY)
+        
+        clahe = cv2.createCLAHE(clipLimit =34, tileGridSize = (40,40))
+
+        equ = clahe.apply(img)
+
+        img = equ
+
+        img_copy = img_color
+
+        _, th = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        im, contours, heirarchy = cv2.findContours(th, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+        i = cv2.drawContours(img, contours, -1, (255,255,0), 3)
+        count = 0
+        for contour in contours:
+            if cv2.contourArea(contour) > 1000 and cv2.contourArea(contour) < 10000: 
+                #epsilon = 0.01*cv2.arcLength(contour, True)
+                #contour = cv2.approxPolyDP(contour, epsilon, True)
+                (x,y), r = cv2.minEnclosingCircle(contour)
+                count += 1
+                x,y,w,h = cv2.boundingRect(contour)
+                cv2.rectangle(img_copy,(x,y),(x+w,y+h), (255,255,0), 3)
+                
+        cv2.namedWindow('output', cv2.WINDOW_NORMAL)
+        cv2.imshow('output', img_copy)
+        cv2.waitKey(0)
+        print count
+'''
