@@ -12,6 +12,8 @@ cv2.createTrackbar('t2','FIELD',0,255, update)
 
 direc = raw_input("Enter directory of files (Include '/' at the end): ")
 
+k = -100
+
 for f in os.listdir(direc):
 
     while True:
@@ -36,3 +38,12 @@ for f in os.listdir(direc):
         image = cv2.resize(image, (1920,1080))
         cv2.imshow('FIELD', image)
 
+        if k == 99:
+            break
+
+
+    if k = 27:
+        break
+
+    elif k = 99:
+        continue
