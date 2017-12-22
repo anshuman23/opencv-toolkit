@@ -42,8 +42,8 @@ for f in os.listdir(direc):
             break
 
 
-    if k = 27:
+    if k == 27:
         break
 
-    elif k = 99:
+    elif k == 99:
         continue
