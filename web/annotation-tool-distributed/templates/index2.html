@@ -1,0 +1,189 @@
+<html>
+  <head><title> UGGHH </title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <style>
+
+      body{
+      font-family: 'Lato', sans-serif;
+      background: url(https://s.cdpn.io/1715/dark_stripes.png)
+      }
+         
+
+      .wrapper {
+      text-align: center;
+      }
+
+      .btn {
+      
+      font-size: 40pt;
+      font-family: 'Lato', sans-serif;
+      height: 200px;
+      width: 500px;
+      }
+
+      #liveImg{position:absolute;z-index:1;}
+
+      #container{
+      display:inline-block;
+      width:1860px;
+      height:1920px;
+      margin: 0 auto;
+      background: black;
+      position:relative;
+      border:5px solid black;
+      border-radius: 10px;
+      box-shadow: 0 5px 50px #333}
+
+      #overlayCanvas{
+      position:relative;
+      z-index:20;
+      }
+      
+    </style>
+    
+    
+    <div id= "container">
+      
+      <img id="liveImg" width="1860" height="1920"> </canvas>
+<canvas id="overlayCanvas" width="1860" height="1920" </canvas>
+	</div>
+
+
+</head>
+
+<body>
+  <script type = "text/javascript">
+
+    var safeKeeping = [];
+    
+    var drawnRects = [];
+
+    var currentbbs = {x:'',y:'',w:'',h:''};
+
+    var canvas=document.getElementById('overlayCanvas');
+    var context=canvas.getContext('2d');
+    
+    var image = document.getElementById("liveImg");
+    
+    var idx = 0;
+    
+    var check = 1;
+    
+    function toggleCheck() {
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    for (var k = 0; k < drawnRects.length; k++) {
+			//context.clearRect(drawnRects[k].x,drawnRects[k].y,drawnRects[k].w,drawnRects[k].h);
+			drawRect(drawnRects[k].x,drawnRects[k].y,drawnRects[k].w,drawnRects[k].h, "#0000ff");
+			}
+
+			drawnRects = [];
+			currentbbs = {x:'',y:'',w:'',h:''};
+			safeKeeping = [];
+			
+    console.log(check);
+    check = 1;
+    console.log(check);
+    socket.emit("change");
+    
+    }
+    
+
+    var socket = io.connect('http://localhost:9010/');
+    socket.on('connect', function() {
+    console.log('connected');
+    });
+    
+    socket.on('image', function(data) {
+    var imgdata = data.image;
+    var x = data.x;
+    var y = data.y;
+    var w = data.w;
+    var h = data.h;
+    if (check == 1 && idx < imgdata.length) {
+
+			    console.log(imgdata[idx]);
+			    image.src = imgdata[idx];
+			    check = 0;
+			    idx = idx + 1;
+
+			    currentbbs.x = x[idx];
+			    currentbbs.y = y[idx];
+			    currentbbs.w = w[idx];
+			    currentbbs.h = h[idx];
+			    
+			    for (var i = 0; i < x[idx].length; i++) {
+						
+						bx = x[idx][i];
+						by = y[idx][i];
+						bw = w[idx][i];
+						bh = h[idx][i];
+
+						drawRect(bx,by,bw,bh, "#0000cd");
+						drawnRects.push({x:bx, y:by, w:bw, h:bh});
+						safeKeeping.push({x:bx, y:by, w:bw, h:bh});
+						
+						}
+						
+						}
+						});
+						
+						
+						function drawRect(x, y, w ,h, colour){
+						context.beginPath();
+						context.strokeStyle=colour;
+						context.rect(x, y, w,h);
+						context.stroke();
+						}
+						
+						// get x, y coordinates of clicking
+						function getPosition(e) {
+						var rect = canvas.getBoundingClientRect();
+						return {
+						x: e.clientX - rect.left,
+						y: e.clientY - rect.top
+						};
+						}
+
+						/*
+						// add event listener on double click to canvas
+						canvas.addEventListener('click', function(e) {
+						var position = getPosition(e);
+
+						for (var j = 0; j < currentbbs.x.length; j++) {
+
+								    if ((currentbbs.x[j] < position.x) && (position.x < currentbbs.x[j] + currentbbs.w[j]) && (currentbbs.y[j] < position.y) && (position.y < currentbbs.y[j] + currentbbs.h[j])) {
+																									      console.log("inside");
+																									      drawRect(currentbbs.x[j], currentbbs.y[j], currentbbs.w[j], currentbbs.h[j], "#FF0000");
+																									      drawnRects.push({x:currentbbs.x[j], y:currentbbs.y[j], w: currentbbs.w[j], h: currentbbs.h[j]});
+																									      }
+																									      }
+						
+																									      });
+																									      */
+
+																									      // add event listener on double click to canvas
+						canvas.addEventListener('click', function(e) {
+						var position = getPosition(e);
+
+						for (var j = 0; j < safeKeeping.length; j++) {
+
+								    if ((safeKeeping[j].x < position.x) && (position.x < safeKeeping[j].x + safeKeeping[j].w) && (safeKeeping[j].y < position.y) && (position.y < safeKeeping[j].y + safeKeeping[j].h)) {
+																									      console.log("inside");
+																									      drawRect(safeKeeping[j].x,safeKeeping[j].y,safeKeeping[j].w,safeKeeping[j].h, "#FF0000");
+																									      drawnRects.push({x:currentbbs.x[j], y:currentbbs.y[j], w: currentbbs.w[j], h: currentbbs.h[j]});
+																									      }
+																									      }
+						
+																									      });
+						
+
+						</script>
+  
+<div class = "wrapper">
+  <button class = "btn" onclick= "toggleCheck()"> NEXT </button>
+</div>
+	  
+</body>
+</html>
