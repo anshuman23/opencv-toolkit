@@ -4,7 +4,7 @@
 - run `python api.py`
 - Change the ip addresses for your wifi in the `temp.py (1), index/templates.html (2)`
 
-####### Database Details
+##### Database Details
 
 - to access the database superuser type `su - postgres`
 - run `psql urldb` (Database is urldb and table is urlrel)
