@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import os
-from segment2 import return_bbs
+from helpers.contour import return_bbs
 from collections import defaultdict
 
 ######################## *///*******RULES********\\\* #####################
